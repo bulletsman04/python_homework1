@@ -40,7 +40,7 @@ def methodDelete():
 def getPatient(id: int):
     if id in patients:
         return patients[id]
-    raise HTTPException(status_code=404, detail="Patient not found")
+    raise HTTPException(status_code=204, detail="Patient not found")
 
 @app.post('/patient')
 def patientInfo(patient: PatientRequest):

@@ -8,7 +8,7 @@ app = FastAPI()
 
 class PatientRequest(BaseModel):
     name: str
-    surname: str
+    surename: str
 
 class PatientReponse(BaseModel):
     id: int

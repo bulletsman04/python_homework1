@@ -1,8 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from pydantic import BaseModel
 
 currentNumber: int = 0
+patients: dict = {}
+
 
 app = FastAPI()
 
@@ -34,9 +36,16 @@ def methodPut():
 def methodDelete():
     return {"method": "DELETE"}
 
+@app.get('/patient/{id}')
+def getPatient(id: int):
+    if id in patients:
+        return patients[id]
+    raise HTTPException(status_code=404, detail="Patient not found")
+
 @app.post('/patient')
 def patientInfo(patient: PatientRequest):
     global currentNumber
     patientFullInfo = PatientReponse(id = currentNumber, patient = patient)
+    patients[currentNumber] = patient
     currentNumber += 1
     return patientFullInfo

@@ -19,7 +19,7 @@ templates = Jinja2Templates(directory="templates")
 
 class PatientRequest(BaseModel):
     name: str
-    surename: str
+    surname: str
 
 class PatientReponse(BaseModel):
     id: int
@@ -79,8 +79,8 @@ def methodDelete():
 @app.get('/patient/{id}')
 def getPatient(id: int, session_token: str = Cookie(None)):
     check_token(session_token)
-    if id in patients:
-        return patients[id]
+    if f"id_{id}" in patients:
+        return patients[f"id_{id}"]
     raise HTTPException(status_code=204, detail="Patient not found")
 
 @app.post('/patient')
@@ -88,6 +88,12 @@ def patientInfo(patient: PatientRequest, session_token: str = Cookie(None)):
     check_token(session_token)
     global currentNumber
     patientFullInfo = PatientReponse(id = currentNumber, patient = patient)
-    patients[currentNumber] = patient
+    patients[f"id_{currentNumber}"] = patient
+    response = RedirectResponse(url=f'/patient/{currentNumber}', status_code=301)
     currentNumber += 1
-    return patientFullInfo
+    return response
+
+@app.get('/patient')
+def getPatient(session_token: str = Cookie(None)):
+    check_token(session_token)
+    return patients

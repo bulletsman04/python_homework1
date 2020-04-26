@@ -1,13 +1,16 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Cookie,Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from fastapi.responses import RedirectResponse
+from hashlib import sha256
 
 currentNumber: int = 0
 patients: dict = {}
 
 
 app = FastAPI()
+app.secret_key = "secretsssssssssssssssssssssssssdfdsfdsgfdhdfh"
+app.tokens = []
 
 security = HTTPBasic()
 
@@ -21,14 +24,20 @@ class PatientReponse(BaseModel):
 
 @app.get('/')
 @app.get('/welcome')
-def hello_world():
+def hello_world(*, response: Response, session_token: str = Cookie(None)):
+    if(session_token not in app.tokens):
+        raise HTTPException(status_code=401, detail="Unathorised")
     return { "message": "Hello World during the coronavirus pandemic!"}
 
 @app.post('/login')
 def login(credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username == "trudnY" and credentials.password == "PaC13Nt":
-        return RedirectResponse(url='/welcome', status_code=301)
-    return HTTPException(status_code=401, detail="Wrong credentials")
+        session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}")).hexdigest()
+        response = RedirectResponse(url='/welcome', status_code=301)
+        response.set_cookie(key="session_token", value=session_token)
+        app.tokens.add(session_token)
+        return response
+    raise HTTPException(status_code=401, detail="Unathorised")
     
 
 @app.get('/method')

@@ -99,9 +99,10 @@ def getPatient(session_token: str = Cookie(None)):
     return patients
 
 @app.delete('/patient/{id}')
-def deletePatient(id: int, session_token: str = Cookie(None)):
+def deletePatient(id: int, response: Response, session_token: str = Cookie(None)):
     check_token(session_token)
     if f"id_{id}" in patients:
         del patients[f"id_{id}"]
-        return f"id_{id}"
+        response = Response(status_code=204)
+        return response
     raise HTTPException(status_code=204, detail="Patient not found")    

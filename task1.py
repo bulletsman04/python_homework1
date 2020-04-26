@@ -17,8 +17,9 @@ class PatientReponse(BaseModel):
     patient: PatientRequest
 
 @app.get('/')
+@app.get('/welcome')
 def hello_world():
-    return {"message": "Hello World during the coronavirus pandemic!"}
+    return {message: "Hello World during the coronavirus pandemic!"}
 
 @app.get('/method')
 def methodGet():

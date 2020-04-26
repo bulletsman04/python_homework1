@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends, Cookie,Response
+from fastapi import FastAPI, HTTPException, Depends, Cookie,Response, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from fastapi.responses import RedirectResponse
 from hashlib import sha256
+from fastapi.templating import Jinja2Templates
 
 currentNumber: int = 0
 patients: dict = {}
@@ -13,6 +14,8 @@ app.secret_key = "secretsssssssssssssssssssssssssdfdsfdsgfdhdfh"
 app.tokens = []
 
 security = HTTPBasic()
+
+templates = Jinja2Templates(directory="templates")
 
 class PatientRequest(BaseModel):
     name: str
@@ -28,14 +31,19 @@ def check_token(session_token: str = Cookie(None)):
 
 
 @app.get('/')
-@app.get('/welcome')
 def hello_world(session_token: str = Cookie(None)):
-    return { "message": "Hello World during the coronavirus pandemic!"}
+        { "message": "Hello World during the coronavirus pandemic!"}
+
+@app.get('/welcome')
+def hello_world_welcome(request: Request, session_token: str = Cookie(None)):
+    check_token(session_token)
+    return templates.TemplateResponse("index.html", {"request": request, "user": app.user}) 
 
 
 @app.post('/login')
 def login(credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username == "trudnY" and credentials.password == "PaC13Nt":
+        app.user = credentials.username
         session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}", encoding='utf8')).hexdigest()
         response = RedirectResponse(url='/welcome', status_code=301)
         response.set_cookie(key="session_token", value=session_token)
@@ -48,6 +56,7 @@ def logout(session_token: str = Cookie(None)):
     check_token(session_token)
     app.tokens.remove(session_token)
     response = RedirectResponse(url='/', status_code=301)
+    app.user = None
     return response
     
 

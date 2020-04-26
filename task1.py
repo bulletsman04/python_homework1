@@ -28,7 +28,7 @@ def hello_world():
 def login(credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username == "trudnY" and credentials.password == "PaC13Nt":
         return RedirectResponse(url='/welcome', status_code=301)
-    return "Wrong data"
+    return HTTPException(status_code=401, detail="Wrong credentials")
     
 
 @app.get('/method')

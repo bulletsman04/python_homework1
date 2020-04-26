@@ -1,12 +1,15 @@
-from fastapi import FastAPI, HTTPException
-
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
+from fastapi.responses import RedirectResponse
 
 currentNumber: int = 0
 patients: dict = {}
 
 
 app = FastAPI()
+
+security = HTTPBasic()
 
 class PatientRequest(BaseModel):
     name: str
@@ -20,6 +23,13 @@ class PatientReponse(BaseModel):
 @app.get('/welcome')
 def hello_world():
     return { "message": "Hello World during the coronavirus pandemic!"}
+
+@app.post('/login')
+def login(credentials: HTTPBasicCredentials = Depends(security)):
+    if credentials.username == "trudnY" and credentials.password == "PaC13Nt":
+        return RedirectResponse(url='/welcome', status_code=301)
+    return "Wrong data"
+    
 
 @app.get('/method')
 def methodGet():

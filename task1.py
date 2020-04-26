@@ -22,18 +22,25 @@ class PatientReponse(BaseModel):
     id: int
     patient: PatientRequest
 
+def check_token(session_token: str = Cookie(None)):
+    if session_token not in app.tokens :
+        raise HTTPException(status_code=401, detail="Unathorised")
+
+
 @app.get('/')
 @app.get('/welcome')
-def hello_world():
+def hello_world(session_token: str = Cookie(None)):
+    check_token(session_token)
     return { "message": "Hello World during the coronavirus pandemic!"}
+
 
 @app.post('/login')
 def login(credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username == "trudnY" and credentials.password == "PaC13Nt":
-        #session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}")).hexdigest()
+        session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}", encoding='utf8')).hexdigest()
         response = RedirectResponse(url='/welcome', status_code=301)
-        #response.set_cookie(key="session_token", value=session_token)
-        #app.tokens.add(session_token)
+        response.set_cookie(key="session_token", value=session_token)
+        app.tokens.append(session_token)
         return response
     raise HTTPException(status_code=401, detail="Unathorised")
     
@@ -55,13 +62,15 @@ def methodDelete():
     return {"method": "DELETE"}
 
 @app.get('/patient/{id}')
-def getPatient(id: int):
+def getPatient(id: int, session_token: str = Cookie(None)):
+    check_token(session_token)
     if id in patients:
         return patients[id]
     raise HTTPException(status_code=204, detail="Patient not found")
 
 @app.post('/patient')
-def patientInfo(patient: PatientRequest):
+def patientInfo(patient: PatientRequest, session_token: str = Cookie(None)):
+    check_token(session_token)
     global currentNumber
     patientFullInfo = PatientReponse(id = currentNumber, patient = patient)
     patients[currentNumber] = patient

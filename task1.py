@@ -30,7 +30,6 @@ def check_token(session_token: str = Cookie(None)):
 @app.get('/')
 @app.get('/welcome')
 def hello_world(session_token: str = Cookie(None)):
-    check_token(session_token)
     return { "message": "Hello World during the coronavirus pandemic!"}
 
 
@@ -43,6 +42,13 @@ def login(credentials: HTTPBasicCredentials = Depends(security)):
         app.tokens.append(session_token)
         return response
     raise HTTPException(status_code=401, detail="Unathorised")
+
+@app.post('/logout')
+def logout(session_token: str = Cookie(None)):
+    check_token(session_token)
+    app.tokens.remove(session_token)
+    response = RedirectResponse(url='/', status_code=301)
+    return response
     
 
 @app.get('/method')

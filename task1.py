@@ -24,9 +24,7 @@ class PatientReponse(BaseModel):
 
 @app.get('/')
 @app.get('/welcome')
-def hello_world(*, response: Response, session_token: str = Cookie(None)):
-    if(session_token not in app.tokens):
-        raise HTTPException(status_code=401, detail="Unathorised")
+def hello_world():
     return { "message": "Hello World during the coronavirus pandemic!"}
 
 @app.post('/login')

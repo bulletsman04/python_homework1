@@ -30,10 +30,10 @@ def hello_world():
 @app.post('/login')
 def login(credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username == "trudnY" and credentials.password == "PaC13Nt":
-        session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}")).hexdigest()
+        #session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}")).hexdigest()
         response = RedirectResponse(url='/welcome', status_code=301)
-        response.set_cookie(key="session_token", value=session_token)
-        app.tokens.add(session_token)
+        #response.set_cookie(key="session_token", value=session_token)
+        #app.tokens.add(session_token)
         return response
     raise HTTPException(status_code=401, detail="Unathorised")
     
